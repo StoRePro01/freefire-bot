@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Free Fire Player Lookup</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .header { text-align: center; padding: 30px 0 20px; }
+    .header h1 { font-size: 28px; color: #ff4444; }
+    .header p { color: #888; font-size: 14px; margin-top: 6px; }
+    .search-card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; }
+    input, select { width: 100%; padding: 10px 12px; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; color: #fff; font-size: 14px; }
+    input:focus, select:focus { outline: none; border-color: #ff4444; }
+    select option { background: #1a1a2e; }
+    .btn { width: 100%; padding: 12px; background: #ff4444; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .btn:hover { background: #cc3333; }
+    .btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+    .error { background: #2a1a1a; border: 1px solid #ff4444; border-radius: 8px; padding: 12px; color: #ff8888; font-size: 14px; margin-bottom: 16px; display: none; }
+    .profile { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; overflow: hidden; display: none; }
+    .banner { height: 80px; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); display: flex; align-items: flex-end; padding: 0 20px; }
+    .avatar { width: 60px; height: 60px; border-radius: 50%; background: #ff4444; border: 3px solid #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; margin-bottom: -20px; }
+    .body { padding: 28px 20px 20px; }
+    .name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+    .name { font-size: 20px; font-weight: 700; }
+    .badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-region { background: #1a3a5a; color: #4a9eff; }
+    .badge-ok { background: #1a3a1a; color: #4aff4a; }
+    .badge-ban { background: #3a1a1a; color: #ff4a4a; }
+    .uid { font-size: 12px; color: #555; margin-bottom: 16px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .stat { background: #0f0f1a; border-radius: 8px; padding: 12px 8px; text-align: center; }
+    .stat-val { font-size: 20px; font-weight: 700; color: #ff4444; }
+    .stat-lbl { font-size: 11px; color: #666; margin-top: 3px; }
+    .section { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin: 14px 0 8px; }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1a1a2e; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 13px; color: #666; }
+    .info-value { font-size: 13px; font-weight: 600; max-width: 60%; text-align: right; }
+    .guild-box { background: #0f0f1a; border-radius: 8px; padding: 12px; }
+    .guild-name { font-size: 15px; font-weight: 600; color: #ff4444; }
+    .guild-meta { font-size: 12px; color: #555; margin-top: 4px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #888; }
+    .note { text-align: center; font-size: 12px; color: #333; margin-top: 20px; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🔥 Free Fire Lookup</h1>
+    <p>Consulta el perfil de cualquier jugador con su UID</p>
+  </div>
+
+  <div class="search-card">
+    <div class="row">
+      <div>
+        <label>UID del jugador</label>
+        <input type="text" id="uid" placeholder="Ej: 5569434100" />
+      </div>
+      <div>
+        <label>Región</label>
+        <select id="region">
+          <option value="BR">🇧🇷 Brasil / LATAM (BR)</option>
+          <option value="IND">🇮🇳 India (IND)</option>
+          <option value="ID">🇮🇩 Indonesia (ID)</option>
+          <option value="SG">🇸🇬 Singapur (SG)</option>
+          <option value="ME">Medio Oriente (ME)</option>
+          <option value="VN">🇻🇳 Vietnam (VN)</option>
+          <option value="TH">🇹🇭 Tailandia (TH)</option>
+          <option value="TW">🇹🇼 Taiwán (TW)</option>
+          <option value="US">🇺🇸 USA (US)</option>
+          <option value="RU">🇷🇺 Rusia (RU)</option>
+          <option value="PK">🇵🇰 Pakistán (PK)</option>
+          <option value="CIS">CIS</option>
+          <option value="BD">🇧🇩 Bangladesh (BD)</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" id="btn" onclick="buscar()">Buscar jugador</button>
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <div class="profile" id="profile">
+    <div class="banner">
+      <div class="avatar" id="avatar">?</div>
+    </div>
+    <div class="body">
+      <div class="name-row">
+        <span class="name" id="nombre"></span>
+        <span class="badge badge-region" id="badge-region"></span>
+        <span class="badge" id="badge-estado"></span>
+      </div>
+      <div class="uid" id="uid-display"></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-val" id="s-nivel">-</div><div class="stat-lbl">Nivel</div></div>
+        <div class="stat"><div class="stat-val" id="s-rango">-</div><div class="stat-lbl">Rango BR</div></div>
+        <div class="stat"><div class="stat-val" id="s-credito">-</div><div class="stat-lbl">Crédito</div></div>
+      </div>
+
+      <div class="section">Información general</div>
+      <div id="info-rows"></div>
+
+      <div id="guild-sec" style="display:none">
+        <div class="section">Guild / Clan</div>
+        <div class="guild-box">
+          <div class="guild-name" id="guild-nombre"></div>
+          <div class="guild-meta" id="guild-meta"></div>
+        </div>
+      </div>
+
+      <div id="outfit-sec" style="display:none">
+        <div class="section">Outfit equipado</div>
+        <div class="tags" id="outfit-tags"></div>
+      </div>
+
+      <div id="skills-sec" style="display:none">
+        <div class="section">Habilidades equipadas</div>
+        <div class="tags" id="skills-tags"></div>
+      </div>
+
+      <div id="pet-sec" style="display:none">
+        <div class="section">Mascota</div>
+        <div id="pet-rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">Herramienta no oficial · Solo datos públicos · No afiliada con Garena</p>
+</div>
+
+<script>
+  const RANKS = {0:"Sin rango",1:"Bronce I",2:"Bronce II",3:"Bronce III",4:"Plata I",5:"Plata II",6:"Plata III",7:"Oro I",8:"Oro II",9:"Oro III",10:"Platino I",11:"Platino II",12:"Platino III",13:"Diamante I",14:"Diamante II",15:"Diamante III",16:"Heroico",17:"Gran Maestro",18:"Challenger"};
+
+  function fila(label, val) {
+    return `<div class="info-row"><span class="info-label">${label}</span><span class="info-value">${val}</span></div>`;
+  }
+
+  async function buscar() {
+    const uid = document.getElementById('uid').value.trim();
+    const region = document.getElementById('region').value;
+    const btn = document.getElementById('btn');
+    const errorDiv = document.getElementById('error');
+    const profileDiv = document.getElementById('profile');
+
+    if (!uid) { mostrarError('Por favor ingresa un UID.'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Buscando...';
+    errorDiv.style.display = 'none';
+    profileDiv.style.display = 'none';
+
+    try {
+      const res = await fetch(`/api/player?uid=${uid}&region=${region}`);
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Jugador no encontrado');
+      mostrarPerfil(data, uid, region);
+    } catch(e) {
+      mostrarError(e.message || 'Error al buscar el jugador. Verifica el UID y la región.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Buscar jugador';
+    }
+  }
+
+  function mostrarError(msg) {
+    const d = document.getElementById('error');
+    d.textContent = msg;
+    d.style.display = 'block';
+  }
+
+  function mostrarPerfil(data, uid, region) {
+    const b = data.basicInfo || {};
+    const p = data.profileInfo || {};
+    const clan = data.clanBasicInfo || null;
+    const pet = data.petInfo || null;
+    const social = data.socialInfo || {};
+    const credit = data.creditScoreInfo || {};
+    const diamond = data.diamondCostRes || {};
+
+    const nombre = b.nickname || 'Desconocido';
+    document.getElementById('avatar').textContent = nombre.charAt(0).toUpperCase();
+    document.getElementById('nombre').textContent = nombre;
+    document.getElementById('uid-display').textContent = `UID: ${b.accountId || uid}`;
+    document.getElementById('badge-region').textContent = b.region || region;
+
+    const est = document.getElementById('badge-estado');
+    if (b.banned) { est.textContent = 'Baneado'; est.className = 'badge badge-ban'; }
+    else { est.textContent = 'Activo'; est.className = 'badge badge-ok'; }
+
+    document.getElementById('s-nivel').textContent = b.level || '-';
+    document.getElementById('s-rango').textContent = RANKS[b.rankingPoints]?.split(' ')[0] || (b.rankingPoints ?? '-');
+    document.getElementById('s-credito').textContent = credit.creditScore || '-';
+
+    let rows = '';
+    if (b.exp) rows += fila('EXP total', Number(b.exp).toLocaleString());
+    if (b.liked) rows += fila('Likes recibidos', Number(b.liked).toLocaleString());
+    if (b.rankingPoints !== undefined) rows += fila('Rango Battle Royale', RANKS[b.rankingPoints] || b.rankingPoints);
+    if (b.csRankingPoints !== undefined) rows += fila('Rango Clash Squad', RANKS[b.csRankingPoints] || b.csRankingPoints);
+    if (diamond.diamondCost !== undefined) rows += fila('Diamantes gastados', Number(diamond.diamondCost).toLocaleString());
+    if (b.badgeCnt) rows += fila('Insignias (BP)', b.badgeCnt);
+    if (social.signature) rows += fila('Biografía', social.signature);
+    if (b.loginCount) rows += fila('Días activo', b.loginCount);
+    document.getElementById('info-rows').innerHTML = rows || fila('Info', 'Perfil con poca información pública');
+
+    if (clan?.clanName) {
+      document.getElementById('guild-nombre').textContent = clan.clanName;
+      document.getElementById('guild-meta').textContent = `ID: ${clan.clanId || '-'} · Nivel: ${clan.clanLevel || '-'} · Miembros: ${clan.memberNum || '-'}`;
+      document.getElementById('guild-sec').style.display = 'block';
+    }
+
+    const outfit = p.equippedOutfit || p.EquippedOutfit || [];
+    if (outfit.length > 0) {
+      document.getElementById('outfit-tags').innerHTML = outfit.map(id => `<div class="tag">Item #${id}</div>`).join('');
+      document.getElementById('outfit-sec').style.display = 'block';
+    }
+
+    const skills = (p.equipedSkills || p.EquipedSkills || []).filter(s => s?.skillId);
+    if (skills.length > 0) {
+      document.getElementById('skills-tags').innerHTML = skills.map(s => `<div class="tag">Skill #${s.skillId}</div>`).join('');
+      document.getElementById('skills-sec').style.display = 'block';
+    }
+
+    if (pet?.name) {
+      document.getElementById('pet-rows').innerHTML = fila('Nombre', pet.name) + fila('Nivel', pet.level || '-') + fila('EXP', pet.exp || '-');
+      document.getElementById('pet-sec').style.display = 'block';
+    }
+
+    document.getElementById('profile').style.display = 'block';
+  }
+
+  document.getElementById('uid').addEventListener('keydown', e => { if (e.key === 'Enter') buscar(); });
+</script>
