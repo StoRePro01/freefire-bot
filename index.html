@@ -22,9 +22,15 @@
     .btn:disabled { background: #333; color: #666; cursor: not-allowed; }
     .error { background: #2a1a1a; border: 1px solid #ff4444; border-radius: 8px; padding: 12px; color: #ff8888; font-size: 14px; margin-bottom: 16px; display: none; }
     .profile { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; overflow: hidden; display: none; }
-    .banner { height: 80px; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); display: flex; align-items: flex-end; padding: 0 20px; }
-    .avatar { width: 60px; height: 60px; border-radius: 50%; background: #ff4444; border: 3px solid #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; margin-bottom: -20px; }
-    .body { padding: 28px 20px 20px; }
+
+    /* Banner y avatar */
+    .banner { height: 110px; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); position: relative; overflow: hidden; }
+    .banner img.banner-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+    .avatar-wrap { position: absolute; bottom: -28px; left: 20px; display: flex; gap: 12px; align-items: flex-end; }
+    .avatar { width: 64px; height: 64px; border-radius: 50%; background: #ff4444; border: 3px solid #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; overflow: hidden; flex-shrink: 0; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .body { padding: 38px 20px 20px; }
     .name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
     .name { font-size: 20px; font-weight: 700; }
     .badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
@@ -42,10 +48,20 @@
     .info-label { font-size: 13px; color: #666; }
     .info-value { font-size: 13px; font-weight: 600; max-width: 60%; text-align: right; }
     .guild-box { background: #0f0f1a; border-radius: 8px; padding: 12px; }
-    .guild-name { font-size: 15px; font-weight: 600; color: #ff4444; }
+    .guild-name-txt { font-size: 15px; font-weight: 600; color: #ff4444; }
     .guild-meta { font-size: 12px; color: #555; margin-top: 4px; }
-    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag { background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #888; }
+
+    /* Grid de imágenes de outfit */
+    .outfit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+    .outfit-item { background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; overflow: hidden; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+    .outfit-item img { width: 100%; height: 100%; object-fit: contain; }
+    .outfit-item.fallback { font-size: 10px; color: #555; text-align: center; padding: 4px; display: none; }
+
+    /* Grid de habilidades */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; }
+    .skill-item { background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; overflow: hidden; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+    .skill-item img { width: 100%; height: 100%; object-fit: contain; }
+
     .note { text-align: center; font-size: 12px; color: #333; margin-top: 20px; }
     .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -89,9 +105,16 @@
   <div class="error" id="error"></div>
 
   <div class="profile" id="profile">
-    <div class="banner">
-      <div class="avatar" id="avatar">?</div>
+    <div class="banner" id="banner">
+      <img class="banner-img" id="banner-img" src="" alt="" style="display:none" />
+      <div class="avatar-wrap">
+        <div class="avatar" id="avatar">
+          <span id="avatar-letra">?</span>
+          <img id="avatar-img" src="" alt="" style="display:none; position:absolute; width:100%; height:100%; object-fit:cover;" />
+        </div>
+      </div>
     </div>
+
     <div class="body">
       <div class="name-row">
         <span class="name" id="nombre"></span>
@@ -111,19 +134,19 @@
       <div id="guild-sec" style="display:none">
         <div class="section">Guild / Clan</div>
         <div class="guild-box">
-          <div class="guild-name" id="guild-nombre"></div>
+          <div class="guild-name-txt" id="guild-nombre"></div>
           <div class="guild-meta" id="guild-meta"></div>
         </div>
       </div>
 
       <div id="outfit-sec" style="display:none">
         <div class="section">Outfit equipado</div>
-        <div class="tags" id="outfit-tags"></div>
+        <div class="outfit-grid" id="outfit-grid"></div>
       </div>
 
       <div id="skills-sec" style="display:none">
         <div class="section">Habilidades equipadas</div>
-        <div class="tags" id="skills-tags"></div>
+        <div class="skills-grid" id="skills-grid"></div>
       </div>
 
       <div id="pet-sec" style="display:none">
@@ -143,6 +166,10 @@
     return `<div class="info-row"><span class="info-label">${label}</span><span class="info-value">${val}</span></div>`;
   }
 
+  function esURL(val) {
+    return typeof val === 'string' && (val.startsWith('http://') || val.startsWith('https://'));
+  }
+
   async function buscar() {
     const uid = document.getElementById('uid').value.trim();
     const region = document.getElementById('region').value;
@@ -156,6 +183,12 @@
     btn.innerHTML = '<span class="spinner"></span>Buscando...';
     errorDiv.style.display = 'none';
     profileDiv.style.display = 'none';
+
+    // Resetear secciones
+    document.getElementById('guild-sec').style.display = 'none';
+    document.getElementById('outfit-sec').style.display = 'none';
+    document.getElementById('skills-sec').style.display = 'none';
+    document.getElementById('pet-sec').style.display = 'none';
 
     try {
       const res = await fetch(`/api/player?uid=${uid}&region=${region}`);
@@ -176,6 +209,15 @@
     d.style.display = 'block';
   }
 
+  function ponerImagen(imgEl, letraEl, url, letra) {
+    if (esURL(url)) {
+      imgEl.src = url;
+      imgEl.style.display = 'block';
+      if (letraEl) letraEl.style.display = 'none';
+      imgEl.onerror = () => { imgEl.style.display = 'none'; if (letraEl) letraEl.style.display = 'block'; };
+    }
+  }
+
   function mostrarPerfil(data, uid, region) {
     const info = data.result?.AccountInfo || data.basicInfo || {};
     const profile = data.result?.AccountProfileInfo || data.profileInfo || {};
@@ -185,10 +227,23 @@
     const credit = data.result?.creditScoreInfo || data.creditScoreInfo || {};
 
     const nombre = info.AccountName || info.nickname || 'Desconocido';
-    document.getElementById('avatar').textContent = nombre.charAt(0).toUpperCase();
+    document.getElementById('avatar-letra').textContent = nombre.charAt(0).toUpperCase();
     document.getElementById('nombre').textContent = nombre;
     document.getElementById('uid-display').textContent = `UID: ${info.AccountId || info.accountId || uid}`;
     document.getElementById('badge-region').textContent = info.AccountRegion || info.region || region;
+
+    // Avatar
+    const avatarUrl = info.AccountAvatarId || info.headPic || '';
+    ponerImagen(document.getElementById('avatar-img'), document.getElementById('avatar-letra'), avatarUrl, nombre.charAt(0).toUpperCase());
+
+    // Banner
+    const bannerUrl = info.AccountBannerId || info.bannerId || '';
+    if (esURL(bannerUrl)) {
+      const bannerImg = document.getElementById('banner-img');
+      bannerImg.src = bannerUrl;
+      bannerImg.style.display = 'block';
+      bannerImg.onerror = () => { bannerImg.style.display = 'none'; };
+    }
 
     const est = document.getElementById('badge-estado');
     if (info.banned) { est.textContent = 'Baneado'; est.className = 'badge badge-ban'; }
@@ -212,24 +267,62 @@
     if (info.AccountLastLogin) rows += fila('Último login', new Date(info.AccountLastLogin * 1000).toLocaleDateString('es-ES'));
     document.getElementById('info-rows').innerHTML = rows || fila('Info', 'Perfil con poca información pública');
 
+    // Guild
     if (guild?.GuildName || guild?.clanName) {
       document.getElementById('guild-nombre').textContent = guild.GuildName || guild.clanName;
       document.getElementById('guild-meta').textContent = `ID: ${guild.Guildid || guild.clanId || '-'} · Nivel: ${guild.GuildLevel || guild.clanLevel || '-'} · Miembros: ${guild.GuildMember || guild.memberNum || '-'}`;
       document.getElementById('guild-sec').style.display = 'block';
     }
 
+    // Outfit con imágenes
     const outfit = profile.EquippedOutfit || profile.equippedOutfit || [];
     if (outfit.length > 0) {
-      document.getElementById('outfit-tags').innerHTML = outfit.map(id => `<div class="tag">Item #${id}</div>`).join('');
-      document.getElementById('outfit-sec').style.display = 'block';
+      const grid = document.getElementById('outfit-grid');
+      grid.innerHTML = '';
+      let visibles = 0;
+      outfit.forEach(val => {
+        if (!esURL(val)) return;
+        visibles++;
+        const div = document.createElement('div');
+        div.className = 'outfit-item';
+        const img = document.createElement('img');
+        img.src = val;
+        img.alt = 'outfit';
+        img.onerror = () => { div.style.display = 'none'; };
+        div.appendChild(img);
+        grid.appendChild(div);
+      });
+      if (visibles > 0) document.getElementById('outfit-sec').style.display = 'block';
     }
 
+    // Habilidades — intentar con URL de assets conocida
     const skills = profile.EquippedSkills || profile.equipedSkills || [];
     if (skills.length > 0) {
-      document.getElementById('skills-tags').innerHTML = skills.map(s => `<div class="tag">Skill #${s}</div>`).join('');
-      document.getElementById('skills-sec').style.display = 'block';
+      const grid = document.getElementById('skills-grid');
+      grid.innerHTML = '';
+      const uniqueSkills = [...new Set(skills.filter(s => s && s !== 0))];
+      uniqueSkills.forEach(skillId => {
+        const div = document.createElement('div');
+        div.className = 'skill-item';
+        if (esURL(skillId)) {
+          const img = document.createElement('img');
+          img.src = skillId;
+          img.alt = 'skill';
+          img.onerror = () => { div.style.display = 'none'; };
+          div.appendChild(img);
+        } else {
+          div.style.fontSize = '10px';
+          div.style.color = '#555';
+          div.style.padding = '4px';
+          div.style.textAlign = 'center';
+          div.textContent = `#${skillId}`;
+        }
+        grid.appendChild(div);
+      });
+      if (uniqueSkills.length > 0) document.getElementById('skills-sec').style.display = 'block';
     }
 
+    // Mascota
     if (pet?.name) {
       document.getElementById('pet-rows').innerHTML = fila('Nombre', pet.name) + fila('Nivel', pet.level || '-') + fila('EXP', pet.exp || '-');
       document.getElementById('pet-sec').style.display = 'block';
