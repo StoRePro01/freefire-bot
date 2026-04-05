@@ -13,14 +13,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Faltan parámetros uid o region' });
   }
 
-  const validRegions = ['IND', 'BR', 'SG', 'RU', 'ID', 'TW', 'US', 'VN', 'TH', 'ME', 'PK', 'CIS', 'BD'];
-  if (!validRegions.includes(region.toUpperCase())) {
-    return res.status(400).json({ error: `Región no válida. Usa: ${validRegions.join(', ')}` });
-  }
-
   try {
     const response = await fetch(
-      `https://free-ff-api-src-5plp.onrender.com/api/v1/account?region=${region.toUpperCase()}&uid=${uid}`
+      `https://playerinfo.vercel.app/api/player?uid=${uid}&region=${region}`
     );
 
     if (!response.ok) {
