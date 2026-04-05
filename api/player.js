@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      `https://proapis.hlgamingofficial.com/main/games/freefire/account/api?sectionName=AllData&PlayerUid=${uid}&region=${region.toLowerCase()}&useruid=V2hH1Huw2SRshpYmxSZEKfnyIxT2&api=Da3YmTXpnzA5iTKKPGT4SEZ5aGh1sj`
+      `https://proapis.hlgamingofficial.com/main/games/freefire/account/api?sectionName=AllData&PlayerUid=${uid}&region=${region.toLowerCase()}&useruid=V2hH1Huw2SRshpYmxSZEKfnyIxT2&api=Da3YmTXpnzA5iTKKPGT4SEZ5aGh1sj&filter=isIMG`
     );
 
     if (!response.ok) {
