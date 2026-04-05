@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      `https://playerinfo.vercel.app/api/player?uid=${uid}&region=${region}`
+      `https://proapis.hlgamingofficial.com/main/games/freefire/account/api?sectionName=AllData&PlayerUid=${uid}&region=${region.toLowerCase()}&useruid=V2hH1Huw2SRshpYmxSZEKfnyIxT2&api=ksHpnTN9fDP0SS9qST2tIH5oRUSvS2`
     );
 
     if (!response.ok) {
@@ -25,6 +25,6 @@ export default async function handler(req, res) {
     const data = await response.json();
     return res.status(200).json(data);
   } catch (error) {
-    return res.status(500).json({ error: 'Error al consultar la API de Free Fire' });
+    return res.status(500).json({ error: 'Error al consultar la API' });
   }
 }
