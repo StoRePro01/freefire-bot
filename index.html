@@ -67,19 +67,19 @@
       <div>
         <label>Región</label>
         <select id="region">
-          <option value="BR">🇧🇷 Brasil / LATAM (BR)</option>
-          <option value="IND">🇮🇳 India (IND)</option>
-          <option value="ID">🇮🇩 Indonesia (ID)</option>
-          <option value="SG">🇸🇬 Singapur (SG)</option>
-          <option value="ME">Medio Oriente (ME)</option>
-          <option value="VN">🇻🇳 Vietnam (VN)</option>
-          <option value="TH">🇹🇭 Tailandia (TH)</option>
-          <option value="TW">🇹🇼 Taiwán (TW)</option>
-          <option value="US">🇺🇸 USA (US)</option>
-          <option value="RU">🇷🇺 Rusia (RU)</option>
-          <option value="PK">🇵🇰 Pakistán (PK)</option>
-          <option value="CIS">CIS</option>
-          <option value="BD">🇧🇩 Bangladesh (BD)</option>
+          <option value="br">🇧🇷 Brasil / Sudamérica (BR)</option>
+          <option value="ind">🇮🇳 India (IND)</option>
+          <option value="id">🇮🇩 Indonesia (ID)</option>
+          <option value="sg">🇸🇬 Singapur (SG)</option>
+          <option value="me">Medio Oriente (ME)</option>
+          <option value="vn">🇻🇳 Vietnam (VN)</option>
+          <option value="th">🇹🇭 Tailandia (TH)</option>
+          <option value="tw">🇹🇼 Taiwán (TW)</option>
+          <option value="us">🇺🇸 USA (US)</option>
+          <option value="ru">🇷🇺 Rusia (RU)</option>
+          <option value="pk">🇵🇰 Pakistán (PK)</option>
+          <option value="cis">CIS</option>
+          <option value="bd">🇧🇩 Bangladesh (BD)</option>
         </select>
       </div>
     </div>
@@ -177,54 +177,56 @@
   }
 
   function mostrarPerfil(data, uid, region) {
-    const b = data.basicInfo || {};
-    const p = data.profileInfo || {};
-    const clan = data.clanBasicInfo || null;
-    const pet = data.petInfo || null;
-    const social = data.socialInfo || {};
-    const credit = data.creditScoreInfo || {};
-    const diamond = data.diamondCostRes || {};
+    const info = data.result?.AccountInfo || data.basicInfo || {};
+    const profile = data.result?.AccountProfileInfo || data.profileInfo || {};
+    const guild = data.result?.GuildInfo || data.clanBasicInfo || null;
+    const pet = data.result?.petInfo || data.petInfo || null;
+    const social = data.result?.socialinfo || data.socialInfo || {};
+    const credit = data.result?.creditScoreInfo || data.creditScoreInfo || {};
 
-    const nombre = b.nickname || 'Desconocido';
+    const nombre = info.AccountName || info.nickname || 'Desconocido';
     document.getElementById('avatar').textContent = nombre.charAt(0).toUpperCase();
     document.getElementById('nombre').textContent = nombre;
-    document.getElementById('uid-display').textContent = `UID: ${b.accountId || uid}`;
-    document.getElementById('badge-region').textContent = b.region || region;
+    document.getElementById('uid-display').textContent = `UID: ${info.AccountId || info.accountId || uid}`;
+    document.getElementById('badge-region').textContent = info.AccountRegion || info.region || region;
 
     const est = document.getElementById('badge-estado');
-    if (b.banned) { est.textContent = 'Baneado'; est.className = 'badge badge-ban'; }
+    if (info.banned) { est.textContent = 'Baneado'; est.className = 'badge badge-ban'; }
     else { est.textContent = 'Activo'; est.className = 'badge badge-ok'; }
 
-    document.getElementById('s-nivel').textContent = b.level || '-';
-    document.getElementById('s-rango').textContent = RANKS[b.rankingPoints]?.split(' ')[0] || (b.rankingPoints ?? '-');
+    document.getElementById('s-nivel').textContent = info.AccountLevel || info.level || '-';
+    const rankPoints = info.BrRankPoint || info.rankingPoints || 0;
+    document.getElementById('s-rango').textContent = RANKS[rankPoints]?.split(' ')[0] || rankPoints || '-';
     document.getElementById('s-credito').textContent = credit.creditScore || '-';
 
     let rows = '';
-    if (b.exp) rows += fila('EXP total', Number(b.exp).toLocaleString());
-    if (b.liked) rows += fila('Likes recibidos', Number(b.liked).toLocaleString());
-    if (b.rankingPoints !== undefined) rows += fila('Rango Battle Royale', RANKS[b.rankingPoints] || b.rankingPoints);
-    if (b.csRankingPoints !== undefined) rows += fila('Rango Clash Squad', RANKS[b.csRankingPoints] || b.csRankingPoints);
-    if (diamond.diamondCost !== undefined) rows += fila('Diamantes gastados', Number(diamond.diamondCost).toLocaleString());
-    if (b.badgeCnt) rows += fila('Insignias (BP)', b.badgeCnt);
-    if (social.signature) rows += fila('Biografía', social.signature);
-    if (b.loginCount) rows += fila('Días activo', b.loginCount);
+    if (info.AccountEXP || info.exp) rows += fila('EXP total', Number(info.AccountEXP || info.exp).toLocaleString());
+    if (info.AccountLikes || info.liked) rows += fila('Likes recibidos', Number(info.AccountLikes || info.liked).toLocaleString());
+    if (info.BrRankPoint !== undefined) rows += fila('Rango Battle Royale', RANKS[info.BrRankPoint] || info.BrRankPoint);
+    if (info.CsRankPoint !== undefined) rows += fila('Rango Clash Squad', RANKS[info.CsRankPoint] || info.CsRankPoint);
+    if (info.BrMaxRank !== undefined) rows += fila('Rango BR Máximo', RANKS[info.BrMaxRank] || info.BrMaxRank);
+    if (info.AccountBPBadges) rows += fila('Insignias (BP)', info.AccountBPBadges);
+    if (social.AccountSignature || social.signature) rows += fila('Biografía', social.AccountSignature || social.signature);
+    if (info.ReleaseVersion) rows += fila('Versión', info.ReleaseVersion);
+    if (info.AccountCreateTime) rows += fila('Cuenta creada', new Date(info.AccountCreateTime * 1000).toLocaleDateString('es-ES'));
+    if (info.AccountLastLogin) rows += fila('Último login', new Date(info.AccountLastLogin * 1000).toLocaleDateString('es-ES'));
     document.getElementById('info-rows').innerHTML = rows || fila('Info', 'Perfil con poca información pública');
 
-    if (clan?.clanName) {
-      document.getElementById('guild-nombre').textContent = clan.clanName;
-      document.getElementById('guild-meta').textContent = `ID: ${clan.clanId || '-'} · Nivel: ${clan.clanLevel || '-'} · Miembros: ${clan.memberNum || '-'}`;
+    if (guild?.GuildName || guild?.clanName) {
+      document.getElementById('guild-nombre').textContent = guild.GuildName || guild.clanName;
+      document.getElementById('guild-meta').textContent = `ID: ${guild.Guildid || guild.clanId || '-'} · Nivel: ${guild.GuildLevel || guild.clanLevel || '-'} · Miembros: ${guild.GuildMember || guild.memberNum || '-'}`;
       document.getElementById('guild-sec').style.display = 'block';
     }
 
-    const outfit = p.equippedOutfit || p.EquippedOutfit || [];
+    const outfit = profile.EquippedOutfit || profile.equippedOutfit || [];
     if (outfit.length > 0) {
       document.getElementById('outfit-tags').innerHTML = outfit.map(id => `<div class="tag">Item #${id}</div>`).join('');
       document.getElementById('outfit-sec').style.display = 'block';
     }
 
-    const skills = (p.equipedSkills || p.EquipedSkills || []).filter(s => s?.skillId);
+    const skills = profile.EquippedSkills || profile.equipedSkills || [];
     if (skills.length > 0) {
-      document.getElementById('skills-tags').innerHTML = skills.map(s => `<div class="tag">Skill #${s.skillId}</div>`).join('');
+      document.getElementById('skills-tags').innerHTML = skills.map(s => `<div class="tag">Skill #${s}</div>`).join('');
       document.getElementById('skills-sec').style.display = 'block';
     }
 
@@ -238,3 +240,5 @@
 
   document.getElementById('uid').addEventListener('keydown', e => { if (e.key === 'Enter') buscar(); });
 </script>
+</body>
+</html>
